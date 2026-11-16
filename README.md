@@ -196,7 +196,7 @@ You will create two App Users, one for each store and therefore in each App Endp
 
 In the supermarket-aa Endpoint, add App User Name: aa-store-01@supermarket.com and password: P@ssword1.
 
-Assign channels by hitting enter for inventory, orders and profile to the identical linked collection.
+Assign channels by hitting enter for inventory, orders, profile, planograms and product_knowledge, each to the identically named linked collection. If any are missing, the app will connect but that collection will stay empty on the device.
 
 Your configuration for the AA Store should look like this:
 

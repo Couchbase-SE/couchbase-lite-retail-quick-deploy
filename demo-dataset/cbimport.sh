@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$SCRIPT_DIR/.."
@@ -11,40 +12,31 @@ BUCKET="supermarket"
 
 echo "Importing data into: $CONN_STRING"
 
-# AA-Store Data
-cbimport json --format list \
-  --cluster "couchbases://$CONN_STRING" \
-  --username "$USERNAME" \
-  --password "$PASSWORD" \
-  --bucket "$BUCKET" \
-  --scope-collection-exp "AA-Store.inventory" \
-  --dataset "file://$SCRIPT_DIR/aa_store_inventory.json" \
-  --generate-key "%id%"
+# import <scope> <collection> <file>
+# Keys come from each document's "id" field, so re-running updates documents
+# instead of creating duplicates.
+import() {
+  echo "-> $1.$2 <- $3"
+  cbimport json --format list \
+    --cluster "couchbases://$CONN_STRING" \
+    --username "$USERNAME" \
+    --password "$PASSWORD" \
+    --bucket "$BUCKET" \
+    --scope-collection-exp "$1.$2" \
+    --dataset "file://$SCRIPT_DIR/$3" \
+    --generate-key "%id%"
+}
 
-cbimport json --format list \
-  --cluster "couchbases://$CONN_STRING" \
-  --username "$USERNAME" \
-  --password "$PASSWORD" \
-  --bucket "$BUCKET" \
-  --scope-collection-exp "AA-Store.profile" \
-  --dataset "file://$SCRIPT_DIR/aa-store-01-profile.json" \
-  --generate-key "%id%"
+for store in aa nyc; do
+  case "$store" in
+    aa)  scope="AA-Store" ;;
+    nyc) scope="NYC-Store" ;;
+  esac
 
-# NYC-Store Data
-cbimport json --format list \
-  --cluster "couchbases://$CONN_STRING" \
-  --username "$USERNAME" \
-  --password "$PASSWORD" \
-  --bucket "$BUCKET" \
-  --scope-collection-exp "NYC-Store.inventory" \
-  --dataset "file://$SCRIPT_DIR/nyc_store_inventory.json" \
-  --generate-key "%id%"
+  import "$scope" inventory         "${store}_store_inventory.json"
+  import "$scope" profile           "${store}-store-01-profile.json"
+  import "$scope" product_knowledge "${store}_store_product_knowledge.json"
+  import "$scope" planograms        "${store}_store_planograms.json"
+done
 
-cbimport json --format list \
-  --cluster "couchbases://$CONN_STRING" \
-  --username "$USERNAME" \
-  --password "$PASSWORD" \
-  --bucket "$BUCKET" \
-  --scope-collection-exp "NYC-Store.profile" \
-  --dataset "file://$SCRIPT_DIR/nyc-store-01-profile.json" \
-  --generate-key "%id%"
+# "orders" starts empty; the app writes to it.

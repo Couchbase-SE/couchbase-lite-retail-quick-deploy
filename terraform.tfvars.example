@@ -28,7 +28,7 @@ bucket = {
 }
 
 scopes      = ["NYC-Store", "AA-Store"]
-collections = ["orders", "inventory", "profile"]
+collections = ["orders", "inventory", "profile", "planograms", "product_knowledge"]
 
 app_service = {
   name        = "supermarket-appservice"
@@ -43,11 +43,11 @@ app_service = {
 endpoints = {
   "supermarket-aa" = {
     scope       = "AA-Store"
-    collections = ["orders", "inventory", "profile"]
+    collections = ["orders", "inventory", "profile", "planograms", "product_knowledge"]
   }
   "supermarket-nyc" = {
     scope       = "NYC-Store"
-    collections = ["orders", "inventory", "profile"]
+    collections = ["orders", "inventory", "profile", "planograms", "product_knowledge"]
   }
 }
 
